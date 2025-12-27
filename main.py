@@ -182,16 +182,105 @@ For example, list[int] would check (and document) that the contents of the list 
 
 # That information will be included in the generated OpenAPI and used by the documentation user interfaces and external tools.
 
-@app.get('/item_list')
-async def query_as_list(q: Annotated[list[str], Query(title="testing title",description="More text as description")]=[]):
-    query_list = {"q":q}
-    return query_list
+# @app.get('/item_list')
+# async def query_as_list(q: Annotated[list[str], Query(title="testing title",description="More text as description")]=[]):
+#     query_list = {"q":q}
+#     return query_list
 
 
 """
-Last Topic Alias parameters
-https://fastapi.tiangolo.com/tutorial/query-params-str-validations/#alias-parameters
+Topic of the start of the day 
+Alias parameters
+
+Alias parameters¶
+Imagine that you want the parameter to be item-query.
+
+Like in:
+
+
+http://127.0.0.1:8000/items/?item-query=foobaritems
+But item-query is not a valid Python variable name.
+
+The closest would be item_query.
+
+But you still need it to be exactly item-query...
+
+Then you can declare an alias, and that alias is what will be used to find the parameter value:
+
+
+
 """
+
+########
+# -1-   #
+########
+
+# @app.get("/alias_parms")
+# async def use_alias_params(q: Annotated[str | None, Query(alias="query-items")] = None):
+#     alias_data = {"alias":"temp data val"}
+#     if q:
+#         alias_data.update({"data":q})
+    
+#     return alias_data
+# we use here http://127.0.0.1:8000/alias_parms/?query-items=fixedqueryy instead of query parmas
+
+
+########
+# -2-   #
+########
+# Deprecating parameters
+# meaning Deprecated = Allowed for now, but discouraged + will probably be removed later.
+# Simple example:
+
+# Old endpoint: /v1/users → Deprecated
+
+# New endpoint: /v2/users → Use this instead
+# The docs will show it like this:deprecate in docs in red
+
+
+
+# @app.get("/see_dep")
+# async def see_dep_doc(
+#     q: Annotated[
+#         str | None, Query(
+#             title="Title for deprecating params",
+#             description= "Allowed for now, but discouraged + will probably be removed later.",
+#             min_length=3,
+#             max_length=10,
+#             deprecated=True  #make Deprecated true 
+#         )
+#     ]
+# ):
+#     data = {"key":"value"}
+#     if q:
+#         data.update({"query":q})
+#     return data
+
+
+
+
+#-----------------------#
+# -3-   #
+#-----------------------#
+# Exclude parameters from OpenAPI
+# if we make include_in_schema false so in api documention their No parameters
+
+
+
+@app.get("/see_exclude_params")
+async def get_exclude_params(q: Annotated[str | None, Query(include_in_schema=False)] = None):
+    default_data = {"key":"default data value"}
+    if q:
+        default_data.update({"add data":q})
+    return default_data
+
+
+"""
+Next day topic Custom Validation
+https://fastapi.tiangolo.com/tutorial/query-params-str-validations/#custom-validation
+"""
+
+
 
 
 
