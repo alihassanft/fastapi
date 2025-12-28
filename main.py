@@ -267,16 +267,59 @@ Then you can declare an alias, and that alias is what will be used to find the p
 
 
 
-@app.get("/see_exclude_params")
-async def get_exclude_params(q: Annotated[str | None, Query(include_in_schema=False)] = None):
-    default_data = {"key":"default data value"}
-    if q:
-        default_data.update({"add data":q})
-    return default_data
+# @app.get("/see_exclude_params")
+# async def get_exclude_params(q: Annotated[str | None, Query(include_in_schema=False)] = None):
+#     default_data = {"key":"default data value"}
+#     if q:
+#         default_data.update({"add data":q})
+#     return default_data
+
 
 
 """
-Next day topic Custom Validation
+Custom Validation
+There could be cases where you need to do some custom validation that can't be done with the parameters shown above.
+
+In those cases, you can use a custom validator function that is applied after the normal validation (e.g. after validating that the value is a str).
+
+You can achieve that using Pydantic's AfterValidator inside of Annotated.
+"""
+from pydantic import AfterValidator
+import random
+
+data = {
+    "isbn-9781529046137": "The Hitchhiker's Guide to the Galaxy",
+    "imdb-tt0371724": "The Hitchhiker's Guide to the Galaxy",
+    "isbn-9781439512982": "Isaac Asimov: The Complete Stories, Vol. 2",
+}
+
+#-----------------------#
+# -1-   #
+#-----------------------#
+
+def check_validation_id(id:str):
+    if not id.startswith(("isbn-","imdb-")):
+        raise ValueError('Invalid ID format, it must start with "isbn-" or "imdb-"')
+    return id
+
+
+@app.get('/custom_validation')
+async def get_custom(id: Annotated[str | None, AfterValidator(check_validation_id)]=None):
+    if id:
+        item = data.get(id)
+
+    else:
+        id, item = random.choice(list(data.items()))
+
+    
+    return {"id":id,"item":item}
+
+
+
+
+
+"""
+Next day topic Custom Validation (Understand that Code and recap)
 https://fastapi.tiangolo.com/tutorial/query-params-str-validations/#custom-validation
 """
 
